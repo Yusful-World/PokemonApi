@@ -1,11 +1,16 @@
+using PokemonApi;
+using PokemonApi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add services to the container.
-
+builder.Services.AddSqlServer<AppDbContext>(connectionString, sql => sql.EnableRetryOnFailure());
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddScoped<ImageServices>();
 
 var app = builder.Build();
 
