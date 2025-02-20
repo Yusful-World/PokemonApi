@@ -5,109 +5,109 @@ using PokemonApi.Models;
 namespace PokemonApi.Controllers
 {
     [ApiController]
-    [Route("api/{controller}")]
+    [Route("api/pokemon")]
     public class PokemonController : ControllerBase
     {
-            private readonly ImageService _imageService;
-            private readonly AppDbContext _context;
+        private readonly ImageService _imageService;
+        private readonly AppDbContext _context;
 
-            public PokemonController(AppDbContext context, ImageService imageService)
+        public PokemonController(AppDbContext context, ImageService imageService)
+        {
+            _context = context;
+            _imageService = imageService;
+        }
+
+        [HttpGet]
+        public IActionResult GetPokemons()
+        {
+            var pokemons = _context.Pokemons.ToList();
+            return Ok(pokemons);
+        }
+
+        [HttpGet("{id:int}")]
+        public IActionResult GetPokemon(int id)
+        {
+            var pokemon = _context.Pokemons.FirstOrDefault(p => p.Id == id);
+            if (pokemon == null)
             {
-                _context = context;
-                _imageService = imageService;
+                return NotFound("Pokemon not found.");
             }
 
-            [HttpGet]
-            public IActionResult GetPokemons()
+            return Ok(pokemon);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddPokemon([FromForm] Pokemon pokemon, [FromForm] IFormFile? image)
+        {
+            if (!ModelState.IsValid)
             {
-                var pokemons = _context.Pokemons.ToList();
-                return Ok(pokemons);
-            }
-
-            [HttpGet("{id:int}")]
-            public IActionResult GetPokemon(int id)
-            {
-                var pokemon = _context.Pokemons.FirstOrDefault(p => p.Id == id);
-                if (pokemon == null)
-                {
-                    return NotFound("Pokemon not found.");
-                }
-
-                return Ok(pokemon);
-            }
-
-            [HttpPost]
-            public async Task<IActionResult> AddPokemon([FromForm] Pokemon pokemon, [FromForm] IFormFile? image)
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                if (image != null)
-                {
-                    string validationError = _imageService.ValidateImage(image);
-                    if (!string.IsNullOrEmpty(validationError))
-                    {
-                        return BadRequest(validationError);
-                    }
-
-                    pokemon.ImageUrl = await _imageService.SaveImageAsync(image);
-                }
-
-                await _context.Pokemons.AddAsync(pokemon);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetPokemon), new { pokemon.Id }, pokemon);
-            }
-
-            [HttpPut("{id}")]
-            public async Task<IActionResult> UpdatePokemon(int id, [FromForm] Pokemon pokemon, [FromForm] IFormFile? newImage)
-            {
-                if (!ModelState.IsValid)
-                {
                 return BadRequest(ModelState);
-                }
-                
-                var pokemonFromDb = _context.Pokemons.FirstOrDefault(p => p.Id == id);
-                if (pokemonFromDb == null)
-                {
-                return NotFound();
-                }
-
-                if (newImage != null)
-                {
-                    _imageService.DeleteImage(pokemonFromDb.ImageUrl);
-                    pokemonFromDb.ImageUrl = await _imageService.SaveImageAsync(newImage);
-                }
-
-                pokemonFromDb.Name = pokemon.Name;
-                pokemonFromDb.Owner = pokemon.Owner;
-                pokemonFromDb.Power = pokemon.Power;
-                pokemonFromDb.Colour = pokemon.Colour;
-                pokemonFromDb.ImageUrl = pokemon.ImageUrl;
-
-                await _context.SaveChangesAsync();
-                
-                return Ok();
             }
 
-            [HttpDelete("{id}")]
-            public async Task<IActionResult> DeletePokemon(int id)
+            if (image != null)
             {
-                var pokemon = _context.Pokemons.FirstOrDefault(p => p.Id == id);
-                if (pokemon == null)
+                string validationError = _imageService.ValidateImage(image);
+                if (!string.IsNullOrEmpty(validationError))
                 {
-                    return NotFound("pokemon does not exist");
+                    return BadRequest(validationError);
                 }
 
-                _imageService.DeleteImage(pokemon.ImageUrl);
-                _context.Pokemons.Remove(pokemon);
-                
-                await _context.SaveChangesAsync();
-                
-                return Ok(new { message = "Pokemon deleted successfully!" });
+                pokemon.ImageUrl = await _imageService.SaveImageAsync(image);
             }
+
+            await _context.Pokemons.AddAsync(pokemon);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetPokemon), new { pokemon.Id }, pokemon);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePokemon(int id, [FromForm] Pokemon pokemon, [FromForm] IFormFile? newImage)
+        {
+            if (!ModelState.IsValid)
+            {
+            return BadRequest(ModelState);
+            }
+                
+            var pokemonFromDb = _context.Pokemons.FirstOrDefault(p => p.Id == id);
+            if (pokemonFromDb == null)
+            {
+            return NotFound();
+            }
+
+            if (newImage != null)
+            {
+                _imageService.DeleteImage(pokemonFromDb.ImageUrl);
+                pokemonFromDb.ImageUrl = await _imageService.SaveImageAsync(newImage);
+            }
+
+            pokemonFromDb.Name = pokemon.Name;
+            pokemonFromDb.Owner = pokemon.Owner;
+            pokemonFromDb.Power = pokemon.Power;
+            pokemonFromDb.Colour = pokemon.Colour;
+            pokemonFromDb.ImageUrl = pokemon.ImageUrl;
+
+            await _context.SaveChangesAsync();
+                
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePokemon(int id)
+        {
+            var pokemon = _context.Pokemons.FirstOrDefault(p => p.Id == id);
+            if (pokemon == null)
+            {
+                return NotFound("pokemon does not exist");
+            }
+
+            _imageService.DeleteImage(pokemon.ImageUrl);
+            _context.Pokemons.Remove(pokemon);
+                
+            await _context.SaveChangesAsync();
+                
+            return Ok(new { message = "Pokemon deleted successfully!" });
+        }
         
     }
 }
