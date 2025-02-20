@@ -11,6 +11,7 @@ namespace PokemonApi.Data
         }
 
         public DbSet<Pokemon> Pokemons { get; set; } 
-        public DbSet<Photo> Photos { get; set; }
+        public DbSet<Photo> Photos { get; set; } 
+        
     }
 }

@@ -2,11 +2,11 @@
 
 namespace PokemonApi
 {
-    public class ImageServices
+    public class ImageService
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ImageServices(IWebHostEnvironment webHostEnvironment)
+        public ImageService(IWebHostEnvironment webHostEnvironment)
         {
             _webHostEnvironment = webHostEnvironment;
         }
