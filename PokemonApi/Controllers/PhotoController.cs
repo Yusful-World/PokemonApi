@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PokemonApi.Data;
 using PokemonApi.Models;
 
 namespace PokemonApi.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/photo")]
+    
     public class PhotoController : Controller
     { 
         private readonly ImageService _imageService;
@@ -25,9 +27,9 @@ namespace PokemonApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetPhoto(int id)
+        public async Task<IActionResult> GetPhoto(int id)
         {
-            var photo = _context.Photos.FirstOrDefault(p => p.Id == id);
+            var photo = await _context.Photos.FirstOrDefaultAsync(p => p.Id == id);
             if (photo == null)
             {
                 return NotFound("Photo does not exist.");
@@ -36,22 +38,11 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddPhoto([FromForm] Photo photo, [FromForm] IFormFile? image)
+        public async Task<IActionResult> AddPhoto(Photo photo)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
-
-            if (image != null)
-            {
-                string validationError = _imageService.ValidateImage(image);
-                if (!string.IsNullOrEmpty(validationError))
-                {
-                    return BadRequest(validationError);
-                }
-
-                photo.ImageUrl = await _imageService.SaveImageAsync(image);
             }
 
             await _context.Photos.AddAsync(photo);
@@ -61,7 +52,7 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePhoto(int id, [FromForm] Photo photo, [FromForm] IFormFile? newImage)
+        public async Task<IActionResult> UpdatePhoto(int id, Photo photo, IFormFile? newImage)
         {
             if (!ModelState.IsValid)
             {
@@ -74,16 +65,16 @@ namespace PokemonApi.Controllers
                 return NotFound();
             }
 
-            if (newImage != null)
-            {
-                _imageService.DeleteImage(existingPhoto.ImageUrl);
-                existingPhoto.ImageUrl = await _imageService.SaveImageAsync(newImage);
-            }
+            //if (newImage != null)
+            //{
+            //    _imageService.DeleteImage(existingPhoto.ImageUrl);
+            //    existingPhoto.ImageUrl = await _imageService.SaveImageAsync(newImage);
+            //}
 
             _context.Photos.Update(existingPhoto);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok("Photo was updated successfully");
         }
 
         [HttpDelete("{id}")]
@@ -95,7 +86,7 @@ namespace PokemonApi.Controllers
                 return NotFound();
             }
 
-            _imageService.DeleteImage(photo.ImageUrl);
+            //_imageService.DeleteImage(photo.ImageUrl);
             _context.Photos.Remove(photo);
             await _context.SaveChangesAsync();
 

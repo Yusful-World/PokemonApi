@@ -4,8 +4,8 @@ using PokemonApi.Models;
 
 namespace PokemonApi.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("api/pokemon")]
     public class PokemonController : ControllerBase
     {
         private readonly ImageService _imageService;
@@ -37,23 +37,23 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddPokemon([FromForm] Pokemon pokemon, [FromForm] IFormFile? image)
+        public async Task<IActionResult> AddPokemon(Pokemon pokemon, IFormFile? image)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (image != null)
-            {
-                string validationError = _imageService.ValidateImage(image);
-                if (!string.IsNullOrEmpty(validationError))
-                {
-                    return BadRequest(validationError);
-                }
+            //if (image != null)
+            //{
+            //    string validationError = _imageService.ValidateImage(image);
+            //    if (!string.IsNullOrEmpty(validationError))
+            //    {
+            //        return BadRequest(validationError);
+            //    }
 
-                pokemon.ImageUrl = await _imageService.SaveImageAsync(image);
-            }
+            //    pokemon.ImageUrl = await _imageService.SaveImageAsync(image);
+            //}
 
             await _context.Pokemons.AddAsync(pokemon);
             await _context.SaveChangesAsync();
@@ -62,7 +62,7 @@ namespace PokemonApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePokemon(int id, [FromForm] Pokemon pokemon, [FromForm] IFormFile? newImage)
+        public async Task<IActionResult> UpdatePokemon(int id, Pokemon pokemon, IFormFile? newImage)
         {
             if (!ModelState.IsValid)
             {
@@ -75,11 +75,11 @@ namespace PokemonApi.Controllers
             return NotFound();
             }
 
-            if (newImage != null)
-            {
-                _imageService.DeleteImage(pokemonFromDb.ImageUrl);
-                pokemonFromDb.ImageUrl = await _imageService.SaveImageAsync(newImage);
-            }
+            //if (newImage != null)
+            //{
+            //    _imageService.DeleteImage(pokemonFromDb.ImageUrl);
+            //    pokemonFromDb.ImageUrl = await _imageService.SaveImageAsync(newImage);
+            //}
 
             pokemonFromDb.Name = pokemon.Name;
             pokemonFromDb.Owner = pokemon.Owner;
@@ -101,7 +101,7 @@ namespace PokemonApi.Controllers
                 return NotFound("pokemon does not exist");
             }
 
-            _imageService.DeleteImage(pokemon.ImageUrl);
+            //_imageService.DeleteImage(pokemon.ImageUrl);
             _context.Pokemons.Remove(pokemon);
                 
             await _context.SaveChangesAsync();
