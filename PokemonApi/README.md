@@ -25,7 +25,7 @@ A simple Pokémon management api application built with ASP.NET Core MVC.
 
 ### Clone the Repository  
 ```sh
-git clone <https://github.com/Yusful-World/MVCPokemon>
+git clone <https://dev.azure.com/abdullahiyusuf182/PokemonApp/_git/PokemonApi?path=/&version=GBmain>
 cd <your-project-folder>
 dotnet ef database update
 dotnet restore
