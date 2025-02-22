@@ -36,4 +36,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapGet("/", () => "Welcome to the Pokémon API! Your API is running.");
+
 app.Run();
