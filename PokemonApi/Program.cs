@@ -25,7 +25,7 @@ if (app.Environment.IsDevelopment() || Environment.GetEnvironmentVariable("RENDE
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pokemon API V1");
-        c.RoutePrefix = ""; // Makes Swagger available at the root URL
+        c.RoutePrefix = "swagger"; 
     });
 }
 
